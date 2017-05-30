@@ -157,6 +157,7 @@ class PaginatedPanel:
     limit = 6000
     selected_index = None
     on_highlight = None
+    is_this_selected = None
 
     def __init__(self, items, on_done, **kwargs):
         self.skip = 0
@@ -198,6 +199,12 @@ class PaginatedPanel:
             kwargs["flags"] = self.flags
         if self.selected_index and self.skip <= self.selected_index < self.skip + self.limit:
             kwargs["selected_index"] = self.selected_index - self.skip
+        if self.is_this_selected and kwargs.get("selected_index") is None:
+            for idx, entry in enumerate(self.ret_list):
+                if self.is_this_selected(entry):
+                    kwargs["selected_index"] = idx
+                    break
+
         if self.on_highlight:
             kwargs["on_highlight"] = self.on_highlight
 
