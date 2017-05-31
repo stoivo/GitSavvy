@@ -274,15 +274,16 @@ class GsBlameActionCommand(PanelActionMixin, TextCommand, GitCommand):
 
         short_hash_pos = self.view.text_point(short_hash_row, 0)
         short_hash = self.view.substr(sublime.Region(short_hash_pos, short_hash_pos + 12))
-        return short_hash
+        return short_hash.strip()
 
 
     def open_commit(self):
         # Uncommitted blocks.
-        if not self.selected_commit_hash().strip():
+        commit_hash = self.selected_commit_hash()
+        if not commit_hash:
             return
 
-        self.view.window().run_command("gs_show_commit", {"commit_hash": short_hash})
+        self.view.window().run_command("gs_show_commit", {"commit_hash": commit_hash})
 
     def commit_before(self, position, commit_hash):
         # I would like it to be something like this, but I could make it work when
