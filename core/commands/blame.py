@@ -47,7 +47,8 @@ class GsBlameCommand(PanelActionMixin, WindowCommand, GitCommand):
         view.settings().set("git_savvy.repo_path", self.__repo_path)
         view.settings().set("git_savvy.file_path", self._file_path)
         view.settings().set("git_savvy.lineno", self.coords[0] + 1)
-        view.settings().set("git_savvy.commit_hash", self._commit_hash)
+        if self._commit_hash:
+            view.settings().set("git_savvy.commit_hash", self._commit_hash)
         view.settings().set("git_savvy.ignore_whitespace", ignore_whitespace)
         view.settings().set("git_savvy.detect_move_or_copy", option)
 
@@ -257,6 +258,7 @@ class GsBlameActionCommand(PanelActionMixin, TextCommand, GitCommand):
         ["open", "Blame on one newer commit", (), {'position': "newer"}],
         ["pick_new_commit", "Pick a new commit to blame"],
         ["show_file_at_commit", "Show file at commit"],
+        ["show_file_at_commit", "Show file at this lines commit", (), {"from_line": True}],
     ]
 
     @util.view.single_cursor_pt
@@ -327,9 +329,14 @@ class GsBlameActionCommand(PanelActionMixin, TextCommand, GitCommand):
             settings.set("git_savvy.commit_hash", previous_commit_hash)
         self.view.run_command("gs_blame_initialize_view")
 
-    def show_file_at_commit(self):
+    def show_file_at_commit(self, from_line=False):
+        if from_line:
+            commit_hash = self.selected_commit_hash() or 'HEAD'
+        else:
+            commit_hash = self.view.settings().get("git_savvy.commit_hash", "HEAD")
+
         self.view.window().run_command("gs_show_file_at_commit", {
-            "commit_hash": self.view.settings().get("git_savvy.commit_hash"),
+            "commit_hash": commit_hash,
             "filepath": self.file_path,
             # it is there in the view, with the scope of
             # constant.numeric.line-number.blame.git-savvy
